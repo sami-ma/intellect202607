@@ -1,2 +1,5 @@
 create database intellect2026;
 
+CREATE SCHEMA sami;
+
+
