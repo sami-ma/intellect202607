@@ -15,3 +15,5 @@ set search_path = sami, public
 create table t2 (id int, name text, address text);
 
 create table public.t3 (name text)
+
+ALTER USER <username> IN DATABASE <db name> SET search_path = myschema, public;
