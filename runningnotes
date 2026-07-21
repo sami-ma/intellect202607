@@ -2,4 +2,14 @@ create database intellect2026;
 
 CREATE SCHEMA sami;
 
+CREATE SCHEMA sami;
 
+create table t1 (id int, name text);
+
+show search_path
+
+select current_user
+
+set search_path = sami, public
+
+create table t2 (id int, name text, address text);
