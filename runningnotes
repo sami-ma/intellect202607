@@ -78,3 +78,61 @@ salary decimal(10,2) check (salary > 0),
 deptno int references dept(dno)
 );
 
+Queries on Employee and department tables:
+
+select * from emp;
+select * from dept;
+select * from salgrade;
+
+select ename, job, sal from emp;
+select sal, job from emp;
+select * from emp;
+select * from emp order by ename desc;
+select * from emp order by ename;
+select ename, job, sal from emp order by sal desc;
+select ename, job, sal from emp order by sal desc, ename desc;
+select * from emp limit 3;
+select * from emp order by sal desc limit 3;
+select ename, job from emp;
+select ename, job from emp limit 2 offset 4;
+
+select * from emp where ename = 'JONES';
+select * from emp where ename in ('JONES', 'ALLEN');
+select * from emp where ename like 'S%';
+select * from emp where ename not like 'S%';
+
+select * from emp where ename ~~ 'S%';
+select * from emp where ename !~~ 'S%';
+
+select job from emp;
+select distinct job from emp;
+select ename as "Employee Name", job as Designation from emp;
+select ename as "Employee Name", job designation from emp;
+select * from emp where ename = $$JONES$$;
+-- date arithmetic
+select now();
+select now() + interval '10 days';
+-- type casting
+select date '2026-07-25' + interval '15 days';
+select '2026-07-25'::date + interval '15 days';
+-- to_char
+select ename, job, to_char(hiredate, 'DAY') from emp;
+select ename, job, to_char(hiredate, 'DY'), to_char(hiredate, 'MONTH') from emp;
+
+-- aggregate function and group OPERATIONS
+
+select sum(sal) from emp;
+select avg(sal) from emp;
+select min(sal), max(sal), count(*) from emp;
+
+select job, min(sal), max(sal), count(*) from emp group by job;
+
+select job, min(sal), max(sal), count(*) from emp group by job having count(*) >= 3;
+
+select job, min(sal), max(sal), count(*), string_agg(ename, ',') from emp group by job;
+
+
+
+
+
+
