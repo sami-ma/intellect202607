@@ -66,3 +66,15 @@ insert into students3 values
 
 select * from students3;
 
+Constraints:
+
+create table dept (dno int primary key, dname varchar(10) not null);
+
+create table employee (
+empno int primary key,
+ename varchar(25) not null,
+pan_no varchar(10) unique,
+salary decimal(10,2) check (salary > 0),
+deptno int references dept(dno)
+);
+
