@@ -17,3 +17,52 @@ create table t2 (id int, name text, address text);
 create table public.t3 (name text)
 
 ALTER USER <username> IN DATABASE <db name> SET search_path = myschema, public;
+
+
+Auto-increment:
+
+create table students (admn_no serial, student_name varchar(20), 
+address varchar(100)) ;
+
+select * from students;
+
+insert into students (student_name, address)  values 
+('Ravi', 'chennai');
+
+select * from students;
+
+insert into students (student_name, address)  
+values ('Raj', 'Mumbai');
+
+create table students2 (admn_no int generated always as identity
+(start with 100 increment by 2 maxvalue 10000) , student_name varchar(20), 
+address varchar(100)) ;
+
+insert into students2 (student_name, address)  values 
+('Ravi', 'chennai');
+
+select * from students2;
+
+insert into students2 (student_name, address)  
+values ('Raj', 'Mumbai');
+
+create table students2 (admn_no int generated always as identity
+(start with 100 increment by 2 maxvalue 10000)  , student_name varchar(20), 
+address varchar(100)) ;
+
+create table students3 (admn_no int, student_name varchar(20), 
+address varchar(100)) ;
+
+create sequence sq_students3 as int increment by 2 
+start with 1500 owned by students3.admn_no ;
+
+insert into students3 values 
+(nextval('sq_students3'), 'Ravi', 'chennai');
+
+select * from students3;
+ 
+insert into students3 values 
+(nextval('sq_students3'), 'Raj', 'Bangalore');
+
+select * from students3;
+
