@@ -159,6 +159,15 @@ select e.ename, e.job, e.sal, s.grade from emp e join salgrade s on e.sal betwee
 
 select e.ename, e.job, e.sal, s.grade, d.dname from emp e join salgrade s on e.sal between s.losal and s.hisal join dept d on e.deptno = d.deptno  ;
 
+-- sub queries
 
+select * from emp where sal = (select max(sal) from emp);
+
+-- multi valued subquery
+
+select * from emp where deptno in (select deptno from dept where loc in ('DALLAS', 'CHICAGO'));
+
+-- co-related sub subquery
+select * from emp e1  where e1.sal = (select max(e2.sal) from emp e2 where e2.job = e1.job);
 
 
