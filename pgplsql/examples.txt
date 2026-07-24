@@ -233,3 +233,254 @@ BEGIN
 END;  $$ 
 
 select func_sum( array [12, 6, 32, 7, 1])
+
+Exception
+---------
+
+Implicit Exception
+-----------------------
+
+CREATE OR REPLACE PROCEDURE exp(epno int)
+    LANGUAGE 'plpgsql'
+AS $BODY$
+DECLARE
+  erec emp%rowtype;
+BEGIN
+  select * into strict erec from emp where empno = epno;
+  raise notice 'Employee Name: % Salary : %', erec.ename, erec.sal;
+EXCEPTION
+   when no_data_found then raise exception 'Invalid emlployee number : %', epno;
+   when too_many_rows then raise exception 'Many Employees matches Employee number : %', epno;
+END;
+$BODY$;
+
+call exp(1234)
+
+
+create or replace procedure exp1(int, int) language plpgsql as
+$$
+declare
+
+  z float;
+
+begin
+
+  if ($2 = 0) then
+     raise;
+  end if;
+  z := $1 / $2;
+  raise notice 'result is %', z;
+
+end;
+ $$ ;
+
+call exp1(4,0)
+
+create or replace procedure exp3(int) language plpgsql as
+$$
+declare
+  r record;
+
+begin
+  select * into strict r from emp where empno = $1;
+  raise notice 'row is %', r;
+exception
+  when no_data_found then raise exception 'Invalid empno %', $1;
+  when others then raise exception 'Something went wrong';
+end;
+ $$ ;
+
+call exp3(777);
+
+create or replace procedure exp4(int, int) language plpgsql as
+$$
+declare
+  x int;
+begin
+
+
+ x := $1 / $2;
+
+  raise notice 'result is %', x;
+exception
+  when division_by_zero then raise exception 'Division by Zero: Given Inputs are % and %', $1, $2;
+  when others then raise exception 'Something went wrong';
+end;
+ $$ ;
+
+call exp4(5,0)
+
+create or replace procedure exp5(int) language plpgsql as
+$$
+declare
+  r record;
+
+begin
+  if ($1 < 1000) then
+   raise exception using errcode = 22000;
+  end if;
+  select * into strict r from emp where empno = $1;
+  raise notice 'row is %', r;
+exception
+  when data_exception then raise exception 'passed parameter must be greater than 1000. Given Value %', $1;
+  when no_data_found then raise exception 'Invalid empno %', $1;
+  when others then raise exception 'Something went wrong';
+end;
+ $$ ;
+
+call exp5(887)
+
+Cursors
+----------
+
+Cursors
+----------
+create or replace procedure mp18() language plpgsql as
+$$
+declare
+  r record;
+  c1  cursor for select * from emp;
+begin
+ open c1;
+ loop
+  fetch c1 into r;
+  exit when not found;
+  raise notice 'row is %', r;
+ end loop;
+end;
+ $$ ;
+
+
+call mp18();
+
+
+create or replace procedure mp19() language plpgsql as
+$$
+declare
+  r record;
+  c1  cursor (dn int) for select * from emp where deptno = dn;
+begin
+ open c1(20);
+ for i in 1..5 loop
+  fetch c1 into r;
+  raise notice 'row is %', r;
+ end loop;
+ close c1;
+end;
+ $$ ;
+
+call mp19();
+
+create or replace procedure m20(int) language plpgsql as
+$$
+declare
+  r record;
+  dn int;
+  c1  cursor for select * from emp where deptno = dn;
+begin
+  dn := $1;
+ open c1;
+ for i in 1..5 loop
+  fetch c1 into r;
+  raise notice 'row is %', r;
+ end loop;
+ close c1;
+end;
+ $$ ;
+
+call m20(30)
+
+
+create or replace procedure m21() language plpgsql as
+$$
+declare
+  r record;
+  dn int;
+  c1  scroll cursor for select * from emp where deptno = dn;
+begin
+  dn := 20;
+ open c1;
+  move forward 3 from c1;
+  fetch c1 into r;
+  raise notice 'row is %', r;
+  fetch relative -2 from c1 into r;
+  raise notice 'row is %', r;
+  close c1;
+end;
+ $$ ;
+
+call m21()
+
+create or replace procedure myproc6() language plpgsql as
+$$
+declare
+  r record;
+  dn int;
+  c1  scroll cursor for select * from emp where deptno = dn;
+begin
+  dn := 20;
+ open c1;
+  move forward 3 from c1;
+  fetch c1 into r;
+  raise notice 'row is %', r;
+  fetch relative -2 from c1 into r;
+  raise notice 'row is %', r;
+  close c1;
+end;
+ $$ ;
+
+=============== process salary for all =================
+
+CREATE OR REPLACE PROCEDURE cur()
+    LANGUAGE 'plpgsql'
+AS $BODY$
+DECLARE
+  erec  record;
+  c1 cursor for select * from emp;
+  S  emp.sal%type;
+BEGIN
+open c1;
+loop
+  fetch from c1 into erec;
+  exit when not found;
+  CASE  erec.deptno
+	WHEN 10 THEN
+		S = erec.sal + (erec.sal * 0.15);
+	WHEN 20 THEN
+		S = erec.sal + (erec.sal * 0.10);
+	WHEN 30 THEN
+		S = erec.sal + (erec.sal * 0.12);
+	ELSE
+		raise notice 'Department % not eligible for salary revision', erec.deptno;
+  END CASE;
+ raise notice  'EmpName : %  Deptno : %  Revised Salary : %', erec.ename, erec.deptno, S;
+end loop;
+close c1;
+END;
+$BODY$;
+
+call cur()
+
+triggers
+------------
+
+
+select * from emp;
+
+update emp set ename = 'aaron' where empno = 7499;
+
+create or replace function emp_trig1() returns trigger LANGUAGE plpgsql as
+$$
+begin
+new.ename := upper(new.ename);
+new.job := upper(new.job);
+return new;
+end; $$ ;
+
+create trigger emptrig1
+before update of ename, job  on emp for each row
+execute procedure emp_trig1();
+
+create trigger emptrig2
+before insert  on emp for each row
+execute procedure emp_trig1();
