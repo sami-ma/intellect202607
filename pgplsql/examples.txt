@@ -57,6 +57,18 @@ end; $$
 
 call p4(9,5)
 
+CREATE FUNCTION sales_tax(real) RETURNS real AS $$
+DECLARE
+ subtotal ALIAS FOR $1;
+BEGIN
+ subtotal = subtotal * 0.06;
+ RETURN subtotal;
+END;
+$$ language plpgsql;
+
+select sales_tax(100);
+
+
 create or replace procedure p5(varchar) 
 language plpgsql
 as $$
