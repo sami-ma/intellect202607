@@ -218,6 +218,21 @@ end; $$
 		
 call p13()
 
+create or replace procedure p13()
+language plpgsql as $$
+declare
+x int := 1;
+begin
+	loop
+		raise notice 'x = %', x;
+        x = x + 1;
+        exit when x > 10;
+        
+     end loop;
+end; $$;
+		
+call p13()
+
 create or replace procedure p14()
 language plpgsql as $$
 declare
