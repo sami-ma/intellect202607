@@ -247,6 +247,19 @@ end; $$
 		
 call p14()
 
+create or replace procedure p13w()
+language plpgsql as $$
+declare
+x int := 1;
+begin
+	while x <= 10 loop
+		raise notice 'x = %', x;
+    x = x + 1;
+  end loop;
+end; $$;
+		
+call p13w()
+
 CREATE FUNCTION func_sum(int[]) RETURNS int  
 language plpgsql AS $$
 DECLARE
