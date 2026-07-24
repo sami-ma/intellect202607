@@ -1,0 +1,235 @@
+PL/pgSQL Programming:
+
+create or replace procedure p1() 
+language plpgsql
+as $$
+declare
+x int;
+y int;
+z int;
+begin
+	x = 10;
+    y := 7;
+    z = x + y;
+    raise notice 'Sum of % and % is %', x,y,z;
+end; $$
+
+call p1()
+
+
+create or replace procedure p2(x int, y int) 
+language plpgsql
+as $$
+declare
+z int;
+begin
+    z = x + y;
+    raise notice 'Sum of % and % is %', x,y,z;
+end; $$
+
+call p2(4,3)
+
+
+create or replace procedure p3(int, int) 
+language plpgsql
+as $$
+declare
+z int;
+begin
+    z = $1 + $2;
+    raise notice 'Sum of % and % is %', $1,$2,z;
+end; $$
+
+call p3(4,3)
+
+
+create or replace procedure p4(int, int) 
+language plpgsql
+as $$
+declare
+x alias for $1;
+y alias for $2;
+z int;
+begin
+    z = x + y;
+    raise notice 'Sum of % and % is %', x,y,z;
+end; $$
+
+call p4(9,5)
+
+create or replace procedure p5(varchar) 
+language plpgsql
+as $$
+declare
+en varchar(10);
+jb varchar(9);
+s decimal(7,2);
+begin
+    select ename, job, sal into en, jb, s  from emp where ename=$1; 
+    raise notice 'employee Details: Name=%, Job=%, Salary=%', en,jb,s;
+
+end; $$
+
+call p5('TURNER')
+
+create or replace procedure p6(varchar) 
+language plpgsql
+as $$
+declare
+en emp.ename%type;
+jb emp.job%type;
+s emp.sal%type;
+begin
+    select ename, job, sal into en, jb, s  from emp where ename=$1; 
+    raise notice 'employee Details: Name=%, Job=%, Salary=%', en,jb,s;
+
+end; $$
+
+
+call p6('WARD')
+
+
+
+create or replace procedure p7(varchar) 
+language plpgsql
+as $$
+declare
+emp_record emp%rowtype;
+
+begin
+    select * into emp_record  from emp where ename=$1; 
+    raise notice 'employee Details: Name=%, Job=%, Salary=%', emp_record.ename, emp_record.job, emp_record.sal;
+
+end; $$
+
+
+call p7('BLAKE')
+
+
+
+create or replace procedure p8(varchar) 
+language plpgsql
+as $$
+declare
+emp_record emp%rowtype;
+
+begin
+    select * into emp_record  from emp where ename=$1; 
+    raise notice 'employee Details: %', emp_record;
+
+end; $$
+
+call p8('KING')
+
+create or replace procedure p9(varchar) 
+language plpgsql
+as $$
+declare
+emp_record emp%rowtype;
+dept_record dept%rowtype;
+
+begin
+    select * into emp_record  from emp where ename=$1; 
+    select * from dept into dept_record where deptno=emp_record.deptno;
+    raise notice 'employee Details: %', emp_record;
+    raise notice '% works in  % Department', emp_record.ename, dept_record;
+
+end; $$
+
+call p9('KING')
+
+create or replace procedure p10(varchar) 
+language plpgsql
+as $$
+declare
+rec_var record;
+begin
+    select * into rec_var  from emp where ename=$1; 
+    raise notice 'employee Details: %', rec_var;
+    select * from dept into rec_var where deptno=rec_var.deptno;
+    raise notice 'Department Department Details : %', rec_var;
+
+end; $$
+
+call p10('KING')
+
+create or replace procedure p11() 
+language  plpgsql as $$
+declare
+cn int;
+BEGIN
+	SELECT count(*) INTO cn FROM emp;
+	IF cn > 10 THEN
+		raise notice 'More than 10 Employees';
+	ELSE
+		raise notice 'Less than 10 Employees';
+	END IF;
+END; $$
+
+call p11()
+
+create or replace procedure p12(int)
+language plpgsql as $$
+declare 
+msg varchar(50);
+x alias for $1;
+begin
+	CASE x
+		WHEN 1, 2 THEN
+			msg := 'one or two';
+		WHEN 3 THEN
+			msg := 'Its 3';
+		ELSE
+			msg := 'other value than one or two or three';
+	END CASE;
+	raise notice '%', msg;
+end; $$
+call p12(3)
+
+
+Loops in PL/pgSQL programming
+-----------------------------
+
+create or replace procedure p13()
+language plpgsql as $$
+declare
+x int := 1;
+begin
+	loop
+		raise notice 'x = %', x;
+        x = x + 1;
+        if x > 10 then
+           exit;
+        end if;
+     end loop;
+end; $$
+		
+call p13()
+
+create or replace procedure p14()
+language plpgsql as $$
+declare
+x int := 1;
+begin
+	loop
+		raise notice 'x = %', x;
+        x = x + 1;
+        exit when x > 10; 
+     end loop;
+end; $$
+		
+call p14()
+
+CREATE FUNCTION func_sum(int[]) RETURNS int  
+language plpgsql AS $$
+DECLARE
+s int := 0;
+x int;
+BEGIN
+	FOREACH x IN ARRAY $1 LOOP
+		s := s + x;
+	END LOOP;
+	RETURN s;
+END;  $$ 
+
+select func_sum( array [12, 6, 32, 7, 1])
